@@ -35,7 +35,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 4. Create 'imported_files' and 'results' folders
+### 4. Create 'imported_files' folder
 
 ```bash
 mkdir -p imported_files results
@@ -63,7 +63,7 @@ export PATH=$PATH:/path/to/your/folder
 create_table
 ```
 
-### 8. The csv file and the pie chart will be created in 'results' folder
+### 8. The csv file and the pie chart will be created in the 'results' folder
 
 
 

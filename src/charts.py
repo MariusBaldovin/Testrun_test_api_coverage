@@ -1,4 +1,4 @@
-""" Charts """
+""" Module to create charts """
 
 import os
 import matplotlib.pyplot as plt
@@ -40,5 +40,5 @@ def plot_test_coverage(rows, results_dir="results",
   # Save the plot as a PNG file
   plt.savefig(os.path.join(results_dir, chart_filename))
 
-  # This will display the plot
-  # plt.show()  
+  # Display the plot
+  # plt.show()

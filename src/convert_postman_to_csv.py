@@ -1,12 +1,12 @@
 """
-This module handles the conversion of Postman JSON to CSV format
+Module to handle the conversion of Postman JSON to CSV format
 """
 
 import json
 import os
 import pandas as pd
-import api_test_counter
-import charts
+import src.api_test_counter as api_test_counter
+import src.charts as charts
 
 def extract_endpoint_path(path_elements):
   """ Joins the components of the 'path' key to create the endpoint """
@@ -102,22 +102,3 @@ def convert_postman_to_csv(postman_json_file, test_file_path, output_csv_file):
 
   # Plotting a pie graph showing done and to do
   charts.plot_test_coverage(rows, "results")
-
-def main():
-  """ Main function to run the script """
-
-  # Path to the exported Postman JSON file
-  postman_json_file = "imported_files/Testrun.postman_collection.json"
-
-  # Path for test_api.py file
-  test_file_path = 'imported_files/test_api.py'
-
-  # Path to the output CSV file
-  output_csv_file = "Api_testing_coverage.csv"
-
-  # Call the function to convert Postman JSON to CSV
-  convert_postman_to_csv(postman_json_file, test_file_path, output_csv_file)
-
-# Run the script when executed
-if __name__ == "__main__":
-  main()

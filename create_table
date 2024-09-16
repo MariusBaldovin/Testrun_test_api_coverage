@@ -3,8 +3,5 @@
 # Get the script directory
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-# Add the script directory to the PATH
-export PATH=$PATH:$SCRIPT_DIR
-
-# Run the Python script
-python3 "$SCRIPT_DIR/convert_postman_to_csv.py"
+# Run the Python script from the correct path
+python3 "$SCRIPT_DIR/src/create_table.py"

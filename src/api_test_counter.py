@@ -85,14 +85,14 @@ def parse_test_api_file(file_path):
           # Capture the method and the endpoint from the matched API request
           method, endpoint = api_match.groups()
           # Remove the {API} placeholder from the endpoint
-          endpoint = endpoint.replace("{API}", "")
+          endpoint = endpoint.replace("{API}", "").lower()
           # Store method and endpoint
           current_endpoint = (method, endpoint)
           # Set found_first_request to true so next requests will not be counted
           found_first_request = True
           # Debugging: Print each matched API request
-          # if "/profiles" in endpoint:
-          #   print(f"Matched request: {method} {endpoint}")
+          if "/report/{device_name}/{timestamp}" in endpoint:
+            print(f"Matched request: {method} {endpoint}")
 
           # print(f"Matched endpoint from test file: {endpoint}")
 
@@ -109,8 +109,8 @@ def parse_test_api_file(file_path):
           # Add the status code to the set for this endpoint
           endpoint_counts[current_endpoint].add(status_code)
           # Debugging: Print each matched status code
-          # if "/profiles" in current_endpoint[1]:
-          #   print(f"Matched status code: {status_code} for {current_endpoint[1]}")
+          if "/report/{device_name}/{timestamp}" in current_endpoint[1]:
+           print(f"Matched status code: {status_code} for {current_endpoint[1]}")
           # Set the checked_status_code to true to skip next lines
           checked_status_code = True
 
@@ -127,8 +127,8 @@ def get_test_count_for_endpoint(endpoint_counts, endpoint, method):
 
   method = method.lower()
 
-  # Remove {API}, placeholders, and trailing slashes from endpoint
-  endpoint = endpoint.replace("{API}", "").rstrip('/')
+  # Remove {API}, placeholders, trailing slashes and convert to lowercase
+  endpoint = endpoint.replace("{API}", "").rstrip('/').lower()
 
   # print(f"Looking for method: {method.upper()}, endpoint: {endpoint}")
 
