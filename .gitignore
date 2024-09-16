@@ -1,0 +1,12 @@
+# Exclude virtual environment
+venv/
+
+# Exclude results folder
+results/
+
+# Exclude imported_files folder
+imported_files/
+
+# Exclude pycache
+__pycache__/
+
