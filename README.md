@@ -1,11 +1,14 @@
-# Testrun Postman to CSV Conversion Utility
+# Testrun test_apy.py coverage
 
-This project provides a Python script to convert the Testrun Postman collection JSON file into CSV format. Additionally, it integrates with the test_api.py to calculate and visualise test coverage.
+This project creates CSV file, Excel file and Pie Chart for test_api.py from Testrun project.
 
 ## Features
-- Converts Postman JSON collections to CSV format.
-- Counts the number of API tests from 'test_api.py' executed for each endpoint.
-- Provides coverage statistics and generates a pie chart visualising the API testing status.
+
+- Counts the number of API tests from 'test_api.py' for each unique response code across all endpoints tested .
+- Creates a CSV file
+- Creates an Excel file
+- Creates a Pie Chart for test coverage
+
 
 ## Requirements
 
