@@ -6,6 +6,7 @@ Skipped tests are excluded from the count
 
 import re
 from collections import defaultdict
+from util import test_api_file
 
 # Parse the test file to count each endpoint unique status codes
 def parse_test_api_file(file_path):
@@ -38,76 +39,76 @@ def parse_test_api_file(file_path):
   # Track when the status code is checked
   checked_status_code = False
 
-  # Open the test_api.py for reading
-  with open(file_path, 'r', encoding='utf-8') as file:
+  lines = test_api_file.load_test_api_file(file_path)
 
-    # Read all lines from the file into a list
-    lines = file.readlines()
+  # Error handling if test_api.py file is not available
+  if not lines:
+    return
 
-    # Iterate over each line in the file
-    for i, line in enumerate(lines):
+  # Iterate over each line in the file
+  for i, line in enumerate(lines):
 
-      # Strip leading and trailing whitespaces
-      line = line.strip()
+    # Strip leading and trailing whitespaces
+    line = line.strip()
 
-      # Check if the line ends with an open parenthesis
-      if line.endswith('(') and i + 1 < len(lines):
-        # Concatenate with the next line
-        line += lines[i + 1].strip()
+    # Check if the line ends with an open parenthesis
+    if line.endswith('(') and i + 1 < len(lines):
+      # Concatenate with the next line
+      line += lines[i + 1].strip()
 
-      # Check if the line is the start of a new test
-      if test_pattern.search(line):
-      # Reset the flags to false for a new test
-        skip_test = False
-        found_first_request = False
-        checked_status_code = False
+    # Check if the line is the start of a new test
+    if test_pattern.search(line):
+    # Reset the flags to false for a new test
+      skip_test = False
+      found_first_request = False
+      checked_status_code = False
 
 
-      # Check if the test is marked as skipped
-      if skip_pattern.search(line):
-        # Change the skip_test to true
-        skip_test = True
-        # Skip the line
-        continue
+    # Check if the test is marked as skipped
+    if skip_pattern.search(line):
+      # Change the skip_test to true
+      skip_test = True
+      # Skip the line
+      continue
 
-      # If the test is skipped
-      if skip_test:
-        # Skip all the lines on the test
-        continue
+    # If the test is skipped
+    if skip_test:
+      # Skip all the lines on the test
+      continue
+
+    # Try to find an API request in the current line
+    if not found_first_request:
 
       # Try to find an API request in the current line
-      if not found_first_request:
+      api_match = api_call_pattern.search(line)
 
-        # Try to find an API request in the current line
-        api_match = api_call_pattern.search(line)
+      if api_match:
+        # Capture the method and the endpoint from the matched API request
+        method, endpoint = api_match.groups()
+        # Remove the {API} placeholder, trailing '/' and change to lowercase
+        endpoint = endpoint.replace("{API}", "").lower().rstrip("/")
+        # Store method and endpoint
+        current_endpoint = (method, endpoint)
+        # Set found_first_request to true for next requests not be counted
+        found_first_request = True
 
-        if api_match:
-          # Capture the method and the endpoint from the matched API request
-          method, endpoint = api_match.groups()
-          # Remove the {API} placeholder, trailing '/' and change to lowercase
-          endpoint = endpoint.replace("{API}", "").lower().rstrip("/")
-          # Store method and endpoint
-          current_endpoint = (method, endpoint)
-          # Set found_first_request to true for next requests not be counted
-          found_first_request = True
+    # Find the status code check line
+    if found_first_request and not checked_status_code:
+      # Try to find a status code assertion in the current line
+      status_code_match = status_code_pattern.search(line)
 
-      # Find the status code check line
-      if found_first_request and not checked_status_code:
-        # Try to find a status code assertion in the current line
-        status_code_match = status_code_pattern.search(line)
+      if status_code_match and current_endpoint:
+        # Capture the status code from the assertion
+        status_code = status_code_match.group(1)
+        # Add the status code to the set for this endpoint
+        endpoint_counts[current_endpoint].add(status_code)
+        # Set the checked_status_code to true to skip next lines
+        checked_status_code = True
 
-        if status_code_match and current_endpoint:
-          # Capture the status code from the assertion
-          status_code = status_code_match.group(1)
-          # Add the status code to the set for this endpoint
-          endpoint_counts[current_endpoint].add(status_code)
-          # Set the checked_status_code to true to skip next lines
-          checked_status_code = True
-
-      # If the status code has been processed
-      if checked_status_code:
-        # Skip the rest of the test lines
-        continue
+    # If the status code has been processed
+    if checked_status_code:
+      # Skip the rest of the test lines
+      continue
 
   # Return dictionary with unique endpoint/status code combinations
   return {key: len(value) for key, value in endpoint_counts.items()}

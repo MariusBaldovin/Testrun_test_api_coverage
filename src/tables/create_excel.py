@@ -31,7 +31,7 @@ def calculate_percentages(test_count, unique_responses_count):
   return f"{done_percentage:.2f} %", f"{todo_percentage:.2f} %"
 
 def create_excel(postman_file, test_file_path, excel_filename):
-  """Utility method to convert Postman JSON to Excel"""
+  """ Create the excel file """
 
   # Load the Postman file from 'util/load_postman.py'
   postman_data = postman.load_postman(postman_file)
@@ -42,6 +42,11 @@ def create_excel(postman_file, test_file_path, excel_filename):
 
   # Parse the test file to get the endpoint counts
   endpoint_test_counts = test_api_counter.parse_test_api_file(test_file_path)
+
+  # Stop execution if the test file couldn't be processed
+  if endpoint_test_counts is None:
+    print(f"Error: Failed to create the excel file '{excel_filename}'")
+    return
 
   # Empty list to be assigned with rows to be written in the Excel file
   rows = []
@@ -154,4 +159,4 @@ def create_excel(postman_file, test_file_path, excel_filename):
     apply_colour_format(worksheet, "I2:I1000", workbook)
 
   # Print a success message on terminal
-  print(f"The Excel was successfully exported to results/{excel_filename}")
+  print(f"The Excel was successfully exported to 'results/{excel_filename}'")

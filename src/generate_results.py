@@ -53,7 +53,8 @@ def generate_results():
     test_coverage.plot_test_coverage(rows, chart_filename)
 
   else:
-    print(f"Error: {csv_filename} not in {RESULTS_DIR} folder")
+    print(f"Error: Pie chart '{chart_filename}' could not be created")
+    print(f"Info: {csv_filename} must be in '{RESULTS_DIR}' folder")
 
 if __name__ == "__main__":
   generate_results()

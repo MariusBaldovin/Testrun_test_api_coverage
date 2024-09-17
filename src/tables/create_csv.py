@@ -30,7 +30,7 @@ def calculate_percentages(test_count, unique_responses_count):
   return f"{done_percentage:.2f} %", f"{todo_percentage:.2f} %"
 
 def create_csv(postman_file, test_file_path, csv_filename):
-  """ Utility method to convert Postman JSON to CSV"""
+  """ Create the CSV file """
 
   # Load the Postman file
   postman_data = postman.load_postman(postman_file)
@@ -41,6 +41,11 @@ def create_csv(postman_file, test_file_path, csv_filename):
 
   # Parse the test file to get the endpoint counts
   endpoint_test_counts = test_api_counter.parse_test_api_file(test_file_path)
+
+  # Stop execution if the test file couldn't be processed
+  if endpoint_test_counts is None:
+    print(f"Error: Failed to create the CSV file '{csv_filename}'")
+    return
 
   # Empty list to be assigned with rows to be written in the csv
   rows = []
@@ -110,4 +115,4 @@ def create_csv(postman_file, test_file_path, csv_filename):
 
   # Save the DataFrame to CSV inside the 'results' folder
   df.to_csv(os.path.join("results", csv_filename), index=False)
-  print(f"The CSV file was successfully exported to results/{csv_filename}")
+  print(f"The CSV file was successfully exported to 'results/{csv_filename}'")
