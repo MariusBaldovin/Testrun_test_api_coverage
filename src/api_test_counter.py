@@ -1,7 +1,7 @@
 """
-This module parses the test_api.py to count unique API tests for each endpoint.
-Skipped tests are excluded from the count. Each endpoint is counted 
-only once per status code, regardless of how many times it is tested.
+This module parses 'test_api.py' to count unique API responses for each endpoint
+Skipped tests are excluded from the count
+
 """
 
 import re
@@ -11,7 +11,7 @@ from collections import defaultdict
 def parse_test_api_file(file_path):
   """ Dictionary to store endpoints and their response code counts """
 
-  # Initialize a set to store counts for each endpoint and status code
+  # Initialize a set to store counts for each unique endpoint and status code
   endpoint_counts = defaultdict(set)
 
   # Pattern to match API requests even when split across 2 lines
@@ -84,33 +84,23 @@ def parse_test_api_file(file_path):
         if api_match:
           # Capture the method and the endpoint from the matched API request
           method, endpoint = api_match.groups()
-          # Remove the {API} placeholder from the endpoint
-          endpoint = endpoint.replace("{API}", "").lower()
+          # Remove the {API} placeholder, trailing '/' and change to lowercase
+          endpoint = endpoint.replace("{API}", "").lower().rstrip("/")
           # Store method and endpoint
           current_endpoint = (method, endpoint)
-          # Set found_first_request to true so next requests will not be counted
+          # Set found_first_request to true for next requests not be counted
           found_first_request = True
-          # Debugging: Print each matched API request
-          if "/report/{device_name}/{timestamp}" in endpoint:
-            print(f"Matched request: {method} {endpoint}")
-
-          # print(f"Matched endpoint from test file: {endpoint}")
 
       # Find the status code check line
       if found_first_request and not checked_status_code:
-
         # Try to find a status code assertion in the current line
         status_code_match = status_code_pattern.search(line)
 
         if status_code_match and current_endpoint:
-
           # Capture the status code from the assertion
           status_code = status_code_match.group(1)
           # Add the status code to the set for this endpoint
           endpoint_counts[current_endpoint].add(status_code)
-          # Debugging: Print each matched status code
-          if "/report/{device_name}/{timestamp}" in current_endpoint[1]:
-           print(f"Matched status code: {status_code} for {current_endpoint[1]}")
           # Set the checked_status_code to true to skip next lines
           checked_status_code = True
 
@@ -123,24 +113,10 @@ def parse_test_api_file(file_path):
   return {key: len(value) for key, value in endpoint_counts.items()}
 
 def get_test_count_for_endpoint(endpoint_counts, endpoint, method):
-  """ Normalize the method to lowercase to match the keys in endpoint_counts """
-
-  method = method.lower()
-
-  # Remove {API}, placeholders, trailing slashes and convert to lowercase
-  endpoint = endpoint.replace("{API}", "").rstrip('/').lower()
-
-  # print(f"Looking for method: {method.upper()}, endpoint: {endpoint}")
-
-  # print(f"Available endpoints in test counts: {list(endpoint_counts.keys())}")
-
-  # Normalise keys in endpoint_counts
-  normalized_endpoint_counts = {
-      (m.lower(), e.rstrip('/')): v for (m, e), v in endpoint_counts.items()
-  }
+  """ Normalise the method to lowercase to match the keys in endpoint_counts """
 
   # Return the count for the given method and endpoint
-  result = normalized_endpoint_counts.get((method, endpoint), 0)
+  result = endpoint_counts.get((method, endpoint), 0)
 
   # print(f"Test count for {method.upper()} {endpoint}: {result}")
   return result

@@ -5,8 +5,8 @@ Module to handle the conversion of Postman JSON to CSV format
 import json
 import os
 import pandas as pd
-import src.api_test_counter as api_test_counter
-import src.charts as charts
+from src import api_test_counter
+from src import testing_coverage
 
 def extract_endpoint_path(path_elements):
   """ Joins the components of the 'path' key to create the endpoint """
@@ -14,20 +14,36 @@ def extract_endpoint_path(path_elements):
   # print(f"Extracted endpoint path from Postman: {endpoint}")
   return endpoint
 
-def convert_postman_to_csv(postman_json_file, test_file_path, output_csv_file):
+def calculate_percentages(test_count, unique_responses_count):
+  """Calculates DONE and TO DO percentages based on test count and responses"""
+
+  # Check if test_count is zero
+  if test_count == 0:
+    return "0.00 %", "100.00 %"
+
+  # Calculate DONE percentage
+  done_percentage = (test_count / unique_responses_count) * 100
+
+  # Calculate TO DO percentage
+  todo_percentage = 100 - done_percentage
+
+  # return DONE and TO DO percentages as strings
+  return f"{done_percentage:.2f} %", f"{todo_percentage:.2f} %"
+
+def convert_postman_to_csv(postman_file, test_file_path, output_csv_file):
   """ Utility method to convert Postman JSON to CSV"""
 
   # Load the Postman file
-  with open(postman_json_file, "r", encoding="utf-8") as file:
+  with open(postman_file, "r", encoding="utf-8") as file:
     postman_data = json.load(file)
 
-  # Parse the test file to get the endpoint test counts api_test_counter
+  # Parse the test file to get the endpoint counts
   endpoint_test_counts = api_test_counter.parse_test_api_file(test_file_path)
 
   # Empty list to be assigned with rows to be written in the csv
   rows = []
 
-  # Iterate over all the endpoints data
+  # Iterate over all Postman file endpoints data
   for item in postman_data["item"]:
 
     # Assign the 'request' field
@@ -36,8 +52,8 @@ def convert_postman_to_csv(postman_json_file, test_file_path, output_csv_file):
     # Assign the 'path' field
     path = request["url"]["path"]
 
-    # Extract the endpoint method
-    method = request["method"]
+    # Extract the endpoint method and change to lowercase
+    method = request["method"].lower()
 
     # Assign the 'response' field
     responses = item["response"]
@@ -57,17 +73,9 @@ def convert_postman_to_csv(postman_json_file, test_file_path, output_csv_file):
     test_count = api_test_counter.get_test_count_for_endpoint(
                   endpoint_test_counts, endpoint_path, method)
 
-    # Check if test_count is zero
-    if test_count == 0:
-      done_percentage = 0
-      todo_percentage = 100
-    else:
-      done_percentage = (test_count / len(unique_responses)) * 100
-      todo_percentage = 100 - done_percentage
-
-    # Format percentages to two decimal places
-    done_percentage = f"{done_percentage:.2f} %"
-    todo_percentage = f"{todo_percentage:.2f} %"
+    # Calculate DONE and TO DO percentages
+    done_percentage, todo_percentage = calculate_percentages(
+                           test_count, len(unique_responses))
 
     # Not tested endpoints
     not_tested = len(unique_responses) - test_count
@@ -89,7 +97,7 @@ def convert_postman_to_csv(postman_json_file, test_file_path, output_csv_file):
     # Append the row to the list
     rows.append(row)
 
-  # Convert to DataFrame
+  # Convert rows to a table
   df = pd.DataFrame(rows)
 
   # Ensure the 'results' folder exists, if not, create it
@@ -101,4 +109,4 @@ def convert_postman_to_csv(postman_json_file, test_file_path, output_csv_file):
   print(f"The CSV file was successfully exported to results/{output_csv_file}")
 
   # Plotting a pie graph showing done and to do
-  charts.plot_test_coverage(rows, "results")
+  testing_coverage.plot_test_coverage(rows, "results")

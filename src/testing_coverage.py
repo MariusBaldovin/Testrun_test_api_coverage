@@ -1,4 +1,6 @@
-""" Module to create charts """
+""" Module to create a pie charts for testing coverage with 
+TO DO and DONE percentages 
+"""
 
 import os
 import matplotlib.pyplot as plt
@@ -23,7 +25,7 @@ def plot_test_coverage(rows, results_dir="results",
   labels = 'Done', 'To Do'
   sizes = [average_done, average_to_do]
   colors = ['lightgreen', 'lightcoral']
-  explode = (0.1, 0) 
+  explode = (0.1, 0)
 
   # Plot
   plt.figure(figsize=(8, 6))
