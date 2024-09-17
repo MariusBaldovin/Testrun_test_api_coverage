@@ -2,10 +2,10 @@
 Module to handle the conversion of Postman JSON to Excel format
 """
 
-import json
 import os
 import pandas as pd
 from src import api_test_counter
+from util.load_postman import load_postman
 
 
 def extract_endpoint_path(path_elements):
@@ -34,9 +34,12 @@ def calculate_percentages(test_count, unique_responses_count):
 def create_excel(postman_file, test_file_path, excel_filename):
   """Utility method to convert Postman JSON to Excel"""
 
-  # Load the Postman file
-  with open(postman_file, "r", encoding="utf-8") as file:
-    postman_data = json.load(file)
+  # Load the Postman file from 'util/load_postman.py'
+  postman_data = load_postman(postman_file)
+
+  # Error handling if postman file is not available
+  if not postman_data:
+    return
 
   # Parse the test file to get the endpoint counts
   endpoint_test_counts = api_test_counter.parse_test_api_file(test_file_path)

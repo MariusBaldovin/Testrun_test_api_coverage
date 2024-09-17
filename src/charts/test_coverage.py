@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 RESULTS_DIR = "results"
 
-def plot_test_coverage(rows, chart_filename="test_coverage.png"):
+def plot_test_coverage(rows, chart_filename):
   """ Plot the test coverage as a pie chart for 'Done' and 'To Do' """
 
   # Sum up all 'Done' percentages
