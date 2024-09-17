@@ -19,13 +19,13 @@ def parse_test_api_file(file_path):
   api_call_pattern = re.compile(r'requests\.(get|post|put|delete)\(f?"([^"]+)"')
 
   # Pattern to match status code assertions
-  status_code_pattern = re.compile(r'assert r\.status_code == (\d{3})')
+  status_code_pattern = re.compile(r"assert r\.status_code == (\d{3})")
 
   # Pattern to match the skipped tests
-  skip_pattern = re.compile(r'@pytest\.mark\.skip|pytest\.skip\(')
+  skip_pattern = re.compile(r"@pytest\.mark\.skip|pytest\.skip\(")
 
   # Pattern to detect the start of a new test
-  test_pattern = re.compile(r'def test_\w+\(')
+  test_pattern = re.compile(r"def test_\w+\(")
 
   # Variable to keep track of the current endpoint being processed
   current_endpoint = None
@@ -39,25 +39,26 @@ def parse_test_api_file(file_path):
   # Track when the status code is checked
   checked_status_code = False
 
-  lines = test_api_file.load_test_api_file(file_path)
+  # Load the test_apy.py lines
+  test_api_lines = test_api_file.load_test_api_file(file_path)
 
   # Error handling if test_api.py file is not available
-  if not lines:
+  if not test_api_lines:
     return
 
   # Iterate over each line in the file
-  for i, line in enumerate(lines):
+  for i, test_api_line in enumerate(test_api_lines):
 
     # Strip leading and trailing whitespaces
-    line = line.strip()
+    test_api_line = test_api_line.strip()
 
     # Check if the line ends with an open parenthesis
-    if line.endswith('(') and i + 1 < len(lines):
+    if test_api_line.endswith("(") and i + 1 < len(test_api_lines):
       # Concatenate with the next line
-      line += lines[i + 1].strip()
+      test_api_line += test_api_lines[i + 1].strip()
 
     # Check if the line is the start of a new test
-    if test_pattern.search(line):
+    if test_pattern.search(test_api_line):
     # Reset the flags to false for a new test
       skip_test = False
       found_first_request = False
@@ -65,7 +66,7 @@ def parse_test_api_file(file_path):
 
 
     # Check if the test is marked as skipped
-    if skip_pattern.search(line):
+    if skip_pattern.search(test_api_line):
       # Change the skip_test to true
       skip_test = True
       # Skip the line
@@ -80,7 +81,7 @@ def parse_test_api_file(file_path):
     if not found_first_request:
 
       # Try to find an API request in the current line
-      api_match = api_call_pattern.search(line)
+      api_match = api_call_pattern.search(test_api_line)
 
       if api_match:
         # Capture the method and the endpoint from the matched API request
@@ -95,7 +96,7 @@ def parse_test_api_file(file_path):
     # Find the status code check line
     if found_first_request and not checked_status_code:
       # Try to find a status code assertion in the current line
-      status_code_match = status_code_pattern.search(line)
+      status_code_match = status_code_pattern.search(test_api_line)
 
       if status_code_match and current_endpoint:
         # Capture the status code from the assertion
