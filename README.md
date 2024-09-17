@@ -21,8 +21,8 @@ The dependencies are listed in the `requirements.txt` file for easy installation
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/postman_to_csv.git
-cd postman_to_csv
+git clone https://github.com/your-username/Testrun_test_api_coverage.git
+cd Testrun_test_api_coverage
 ```
 
 ### 2. Create and Activate a Virtual Environment (Linux)
