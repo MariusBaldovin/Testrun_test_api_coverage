@@ -1,5 +1,6 @@
 """
-Checks if test-api.py file exists
+Loads the test_api.py file
+Checks if test_api.py file exists in 'imported_files' directoy
 """
 
 def load_test_api_file(test_api_file):

@@ -1,4 +1,5 @@
 """
+Loads the Postman json file
 Checks if Postman file exists and is a valid JSONReturns the JSON data if valid
 """
 
