@@ -41,7 +41,7 @@ pip install -r requirements.txt
 ### 4. Create 'imported_files' folder
 
 ```bash
-mkdir -p imported_files results
+mkdir -p imported_files
 ```        
 
 ### 5. Place testrun Postman collection (Testrun.postman_collection.json) in the 'imported_files' folder.
@@ -51,7 +51,7 @@ mkdir -p imported_files results
 ### 7. Make the create_table Script Executable
 
 ```bash
-chmod +x generate_results
+chmod +x src/generate_results
 ```
 
 ### 7. Add the PATH for your folder

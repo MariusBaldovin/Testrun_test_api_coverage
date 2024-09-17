@@ -10,12 +10,12 @@ import os
 import pandas as pd
 
 # pylint: disable=C0413
-from src.create_csv import create_csv
-from src.create_excel import create_excel
-from src.charts.test_coverage import plot_test_coverage
+from tables.create_csv import create_csv
+from tables.create_excel import create_excel
+from charts import test_coverage
 
 # Path for test_api.py file
-TEST_FILE_PATH = 'imported_files/test_api.py'
+TEST_FILE_PATH = "imported_files/test_api.py"
 
 # Path to the exported Postman JSON file
 POSTMAN_FILE_PATH = "imported_files/Testrun.postman_collection.json"
@@ -47,10 +47,10 @@ def generate_results():
 
     # Read the generated CSV file and convert it into a dictionary
     rows = pd.read_csv(os.path.join(RESULTS_DIR,
-                                    csv_filename)).to_dict('records')
+                                    csv_filename)).to_dict("records")
 
     # Create the pie chart
-    plot_test_coverage(rows, chart_filename)
+    test_coverage.plot_test_coverage(rows, chart_filename)
 
   else:
     print(f"Error: {csv_filename} not in {RESULTS_DIR} folder")

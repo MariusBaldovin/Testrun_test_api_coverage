@@ -1,11 +1,11 @@
 """
-Module to handle the conversion of Postman JSON to CSV format
+Module to create CSV file
 """
 
 import os
 import pandas as pd
-from src import api_test_counter
-from util.load_postman import load_postman
+from counter import test_api_counter
+from util import postman
 
 def extract_endpoint_path(path_elements):
   """ Joins the components of the 'path' key to create the endpoint """
@@ -33,14 +33,14 @@ def create_csv(postman_file, test_file_path, csv_filename):
   """ Utility method to convert Postman JSON to CSV"""
 
   # Load the Postman file
-  postman_data = load_postman(postman_file)
+  postman_data = postman.load_postman(postman_file)
 
   # Error handling if postman file is not available
   if not postman_data:
     return
 
   # Parse the test file to get the endpoint counts
-  endpoint_test_counts = api_test_counter.parse_test_api_file(test_file_path)
+  endpoint_test_counts = test_api_counter.parse_test_api_file(test_file_path)
 
   # Empty list to be assigned with rows to be written in the csv
   rows = []
@@ -64,7 +64,7 @@ def create_csv(postman_file, test_file_path, csv_filename):
     endpoint = extract_endpoint_path(path)
 
     # Create a set of unique response codes
-    unique_responses = {response['code'] for response in responses}
+    unique_responses = {response["code"] for response in responses}
 
     # Combine each endpoint responses into a string (one response per line)
     combined_responses = "\n".join(
@@ -72,8 +72,10 @@ def create_csv(postman_file, test_file_path, csv_filename):
     )
 
     # Use the function from api_test_counter to get test count for this endpoint
-    test_count = api_test_counter.get_test_count_for_endpoint(
-                  endpoint_test_counts, endpoint, method)
+    test_count = test_api_counter.get_test_count_for_endpoint(
+                                    endpoint_test_counts,
+                                    endpoint,
+                                    method)
 
     # Calculate DONE and TO DO percentages
     done_percentage, todo_percentage = calculate_percentages(

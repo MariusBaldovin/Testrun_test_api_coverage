@@ -1,12 +1,11 @@
 """
-Module to handle the conversion of Postman JSON to Excel format
+Module to create excel file
 """
 
 import os
 import pandas as pd
-from src import api_test_counter
-from util.load_postman import load_postman
-
+from counter import test_api_counter
+from util import postman
 
 def extract_endpoint_path(path_elements):
   """Joins the components of the 'path' key to create the endpoint"""
@@ -35,14 +34,14 @@ def create_excel(postman_file, test_file_path, excel_filename):
   """Utility method to convert Postman JSON to Excel"""
 
   # Load the Postman file from 'util/load_postman.py'
-  postman_data = load_postman(postman_file)
+  postman_data = postman.load_postman(postman_file)
 
   # Error handling if postman file is not available
   if not postman_data:
     return
 
   # Parse the test file to get the endpoint counts
-  endpoint_test_counts = api_test_counter.parse_test_api_file(test_file_path)
+  endpoint_test_counts = test_api_counter.parse_test_api_file(test_file_path)
 
   # Empty list to be assigned with rows to be written in the Excel file
   rows = []
@@ -66,14 +65,17 @@ def create_excel(postman_file, test_file_path, excel_filename):
     endpoint_path = extract_endpoint_path(path)
 
     # Create a list of unique response codes
-    unique_responses = {response['code'] for response in responses}
+    unique_responses = {response["code"] for response in responses}
 
     # Combine each endpoint responses into a string (one response per line)
     combined_responses = "\n".join([response["name"] for response in responses])
 
     # Use the function from api_test_counter to get test count for this endpoint
-    test_count = api_test_counter.get_test_count_for_endpoint(
-                  endpoint_test_counts, endpoint_path, method)
+    test_count = test_api_counter.get_test_count_for_endpoint(
+                                    endpoint_test_counts,
+                                    endpoint_path,
+                                    method
+                                  )
 
     # Calculate DONE and TO DO percentages
     done_percentage, todo_percentage = calculate_percentages(
@@ -109,47 +111,47 @@ def create_excel(postman_file, test_file_path, excel_filename):
     """ Applies colour format to columns with percentages """
 
     # Red colour format
-    format_red = workbook.add_format({'bg_color': '#FFCCCC',
-                                      'font_color': '#9C0006'})
+    format_red = workbook.add_format({"bg_color": "#FFCCCC",
+                                      "font_color": "#9C0006"})
 
     # Orange colour format
-    format_orange = workbook.add_format({'bg_color': '#FFEB9C',
-                                         'font_color': '#9C6500'})
+    format_orange = workbook.add_format({"bg_color": "#FFEB9C",
+                                         "font_color": "#9C6500"})
 
     # Green colour format
-    format_green = workbook.add_format({'bg_color': '#C6EFCE',
-                                        'font_color': '#006100'})
+    format_green = workbook.add_format({"bg_color": "#C6EFCE",
+                                        "font_color": "#006100"})
 
     # Apply colour format for 100 %
-    worksheet.conditional_format(column_range, {'type': 'text',
-                                                'criteria': 'containing',
-                                                'value': '100.00 %',
-                                                'format': format_green})
+    worksheet.conditional_format(column_range, {"type": "text",
+                                                "criteria": "containing",
+                                                "value": "100.00 %",
+                                                "format": format_green})
 
     # Apply colour format for 0 %
-    worksheet.conditional_format(column_range, {'type': 'text',
-                                                'criteria': 'containing',
-                                                'value': '0.00 %',
-                                                'format': format_red})
+    worksheet.conditional_format(column_range, {"type": "text",
+                                                "criteria": "containing",
+                                                "value": "0.00 %",
+                                                "format": format_red})
     # Apply colour format for the rest
-    worksheet.conditional_format(column_range, {'type': 'text',
-                                                'criteria': 'containing',
-                                                'value': '%',
-                                                'format': format_orange})
+    worksheet.conditional_format(column_range, {"type": "text",
+                                                "criteria": "containing",
+                                                "value": "%",
+                                                "format": format_orange})
 
   # Create an Excel writer with xlsxwriter engine
   output_excel_path = os.path.join("results", excel_filename)
-  with pd.ExcelWriter(output_excel_path, engine='xlsxwriter') as writer:
+  with pd.ExcelWriter(output_excel_path, engine="xlsxwriter") as writer:
     # Write the DataFrame to an Excel sheet
-    df.to_excel(writer, index=False, sheet_name='API Test Coverage')
+    df.to_excel(writer, index=False, sheet_name="API Test Coverage")
 
     # Access the workbook and the worksheet
     workbook = writer.book
-    worksheet = writer.sheets['API Test Coverage']
+    worksheet = writer.sheets["API Test Coverage"]
 
     # Apply conditional formatting to both the 'DONE' and 'TO DO' columns
-    apply_colour_format(worksheet, 'H2:H1000', workbook)
-    apply_colour_format(worksheet, 'I2:I1000', workbook)
+    apply_colour_format(worksheet, "H2:H1000", workbook)
+    apply_colour_format(worksheet, "I2:I1000", workbook)
 
   # Print a success message on terminal
   print(f"The Excel was successfully exported to results/{excel_filename}")
