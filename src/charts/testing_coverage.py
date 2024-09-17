@@ -5,8 +5,9 @@ TO DO and DONE percentages
 import os
 import matplotlib.pyplot as plt
 
-def plot_test_coverage(rows, results_dir="results",
-               chart_filename="test_coverage.png"):
+RESULTS_DIR = "results"
+
+def plot_test_coverage(rows, chart_filename="test_coverage.png"):
   """ Plot the test coverage as a pie chart for 'Done' and 'To Do' """
 
   # Sum up all 'Done' percentages
@@ -24,7 +25,7 @@ def plot_test_coverage(rows, results_dir="results",
   # Data to plot
   labels = 'Done', 'To Do'
   sizes = [average_done, average_to_do]
-  colors = ['lightgreen', 'lightcoral']
+  colors = ['#c2f1c8', '#ff6d70']
   explode = (0.1, 0)
 
   # Plot
@@ -33,14 +34,12 @@ def plot_test_coverage(rows, results_dir="results",
           autopct='%1.1f%%', shadow=True, startangle=140)
   # Equal aspect ratio ensures that pie is drawn as a circle.
   plt.axis('equal')
-  plt.title('Overall API Testing Coverage')
+  plt.title('API Testing Coverage')
 
   # Ensure the results directory exists, if not, create it
-  if not os.path.exists(results_dir):
-    os.makedirs(results_dir)
+  if not os.path.exists(RESULTS_DIR):
+    os.makedirs(RESULTS_DIR)
 
   # Save the plot as a PNG file
-  plt.savefig(os.path.join(results_dir, chart_filename))
-
-  # Display the plot
-  # plt.show()
+  plt.savefig(os.path.join(RESULTS_DIR, chart_filename))
+  print(f"The Pie Chart was successfully exported to results/{chart_filename}")

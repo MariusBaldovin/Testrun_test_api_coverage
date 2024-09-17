@@ -1,7 +1,0 @@
-#!/bin/bash
-
-# Get the script directory
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-
-# Run the Python script from the correct path
-python3 "$SCRIPT_DIR/src/create_table.py"

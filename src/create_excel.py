@@ -31,7 +31,7 @@ def calculate_percentages(test_count, unique_responses_count):
   # return DONE and TO DO percentages as strings
   return f"{done_percentage:.2f} %", f"{todo_percentage:.2f} %"
 
-def convert_postman_to_excel(postman_file, test_file_path, output_excel_file):
+def create_excel(postman_file, test_file_path, excel_filename):
   """Utility method to convert Postman JSON to Excel"""
 
   # Load the Postman file
@@ -135,7 +135,7 @@ def convert_postman_to_excel(postman_file, test_file_path, output_excel_file):
                                                 'format': format_orange})
 
   # Create an Excel writer with xlsxwriter engine
-  output_excel_path = os.path.join("results", output_excel_file)
+  output_excel_path = os.path.join("results", excel_filename)
   with pd.ExcelWriter(output_excel_path, engine='xlsxwriter') as writer:
     # Write the DataFrame to an Excel sheet
     df.to_excel(writer, index=False, sheet_name='API Test Coverage')
@@ -149,4 +149,4 @@ def convert_postman_to_excel(postman_file, test_file_path, output_excel_file):
     apply_colour_format(worksheet, 'I2:I1000', workbook)
 
   # Print a success message on terminal
-  print(f"The Excel was successfully exported to results/{output_excel_file}")
+  print(f"The Excel was successfully exported to results/{excel_filename}")

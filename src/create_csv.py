@@ -6,7 +6,6 @@ import json
 import os
 import pandas as pd
 from src import api_test_counter
-from src import testing_coverage
 
 def extract_endpoint_path(path_elements):
   """ Joins the components of the 'path' key to create the endpoint """
@@ -30,7 +29,7 @@ def calculate_percentages(test_count, unique_responses_count):
   # return DONE and TO DO percentages as strings
   return f"{done_percentage:.2f} %", f"{todo_percentage:.2f} %"
 
-def convert_postman_to_csv(postman_file, test_file_path, output_csv_file):
+def create_csv(postman_file, test_file_path, csv_filename):
   """ Utility method to convert Postman JSON to CSV"""
 
   # Load the Postman file
@@ -59,9 +58,9 @@ def convert_postman_to_csv(postman_file, test_file_path, output_csv_file):
     responses = item["response"]
 
     # Extract the endpoint path from 'path' field using 'extract_endpoint_path'
-    endpoint_path = extract_endpoint_path(path)
+    endpoint = extract_endpoint_path(path)
 
-    # Create a list of unique response codes
+    # Create a set of unique response codes
     unique_responses = {response['code'] for response in responses}
 
     # Combine each endpoint responses into a string (one response per line)
@@ -71,7 +70,7 @@ def convert_postman_to_csv(postman_file, test_file_path, output_csv_file):
 
     # Use the function from api_test_counter to get test count for this endpoint
     test_count = api_test_counter.get_test_count_for_endpoint(
-                  endpoint_test_counts, endpoint_path, method)
+                  endpoint_test_counts, endpoint, method)
 
     # Calculate DONE and TO DO percentages
     done_percentage, todo_percentage = calculate_percentages(
@@ -83,7 +82,7 @@ def convert_postman_to_csv(postman_file, test_file_path, output_csv_file):
     # Construct the dictionary which represents a row in the table
     row = {
       "ENDPOINT NAME": item["name"],
-      "ENDPOINT PATH": endpoint_path,
+      "ENDPOINT PATH": endpoint,
       "METHOD": request["method"],
       "API RESPONSES": combined_responses,
       "NUMBER OF RESPONSES": len(unique_responses),
@@ -105,8 +104,5 @@ def convert_postman_to_csv(postman_file, test_file_path, output_csv_file):
     os.makedirs("results")
 
   # Save the DataFrame to CSV inside the 'results' folder
-  df.to_csv(os.path.join("results", output_csv_file), index=False)
-  print(f"The CSV file was successfully exported to results/{output_csv_file}")
-
-  # Plotting a pie graph showing done and to do
-  testing_coverage.plot_test_coverage(rows, "results")
+  df.to_csv(os.path.join("results", csv_filename), index=False)
+  print(f"The CSV file was successfully exported to results/{csv_filename}")

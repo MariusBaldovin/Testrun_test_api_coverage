@@ -48,19 +48,19 @@ mkdir -p imported_files results
 ### 7. Make the create_table Script Executable
 
 ```bash
-chmod +x create_table
+chmod +x generate_results
 ```
 
 ### 7. Add the PATH for your folder
 
 ```bash
-export PATH=$PATH:/path/to/your/folder
+export PATH=$PATH:/path/to/your/folder 
 ```
 
 ### 8. Running the Script
 
 ``` bash
-create_table
+ generate_results
 ```
 
 ### 8. The csv file and the pie chart will be created in the 'results' folder

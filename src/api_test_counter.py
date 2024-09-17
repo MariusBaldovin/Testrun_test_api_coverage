@@ -113,7 +113,7 @@ def parse_test_api_file(file_path):
   return {key: len(value) for key, value in endpoint_counts.items()}
 
 def get_test_count_for_endpoint(endpoint_counts, endpoint, method):
-  """ Normalise the method to lowercase to match the keys in endpoint_counts """
+  """ Get the method and number of endpoints  """
 
   # Return the count for the given method and endpoint
   result = endpoint_counts.get((method, endpoint), 0)
