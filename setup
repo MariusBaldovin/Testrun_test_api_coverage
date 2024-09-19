@@ -1,39 +1,41 @@
-#!/bin/bash
-
-# Step 1: Create and Activate a Virtual Environment
+# Create and Activate a virtual environment
 if [ ! -d "venv" ]; then
-  echo "Creating virtual environment..."
+  echo "Creating virtual environment"
   python3 -m venv venv
 else
-  echo "Virtual environment already exists."
+  echo "Virtual environment already exists"
 fi
 
-echo "Activating virtual environment..."
+echo "Activating virtual environment"
 source venv/bin/activate
 
-# Step 2: Install Dependencies
-echo "Installing dependencies..."
+# Install dependencies
+echo "Installing dependencies from requirements.txt file"
 pip install -r requirements.txt
 
-# Step 3: Create 'imported_files' folder
+# Create the 'imported_files' folder
 if [ ! -d "imported_files" ]; then
-  echo "Creating 'imported_files' folder..."
+  echo "Creating 'imported_files' directory"
   mkdir -p imported_files
+else
+  echo "The 'imported_files' directory already exists"
 fi
 
-# Step 4: Make the generate_results Script Executable
-echo "Making 'generate_results' script executable..."
+# Make the 'generate_results' script executable
+echo "Making 'generate_results' script executable"
 chmod +x ./src/generate_results
 
-# Step 5: Add the Script Directory to PATH
+# Add the root directory to PATH
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 if [[ ":$PATH:" != *":$SCRIPT_DIR:"* ]]; then
   BASH_CONFIG="$HOME/.bashrc"
-  echo "Adding script directory to PATH..."
+  echo "Adding script directory to PATH"
   echo "export PATH=\$PATH:$SCRIPT_DIR" >> "$BASH_CONFIG"
   source "$BASH_CONFIG"
-  echo "The directory $SCRIPT_DIR has been added to your PATH"
+  echo "The directory $SCRIPT_DIR has been added to the PATH"
   echo "Please restart your terminal or run 'source $BASH_CONFIG' to apply the changes"
+else 
+  echo "The directory $SCRIPT_DIR already added to the PATH"
 fi
 
