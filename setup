@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# Step 1: Create and Activate a Virtual Environment
+if [ ! -d "venv" ]; then
+  echo "Creating virtual environment..."
+  python3 -m venv venv
+else
+  echo "Virtual environment already exists."
+fi
+
+echo "Activating virtual environment..."
+source venv/bin/activate
+
+# Step 2: Install Dependencies
+echo "Installing dependencies..."
+pip install -r requirements.txt
+
+# Step 3: Create 'imported_files' folder
+if [ ! -d "imported_files" ]; then
+  echo "Creating 'imported_files' folder..."
+  mkdir -p imported_files
+fi
+
+# Step 4: Make the generate_results Script Executable
+echo "Making 'generate_results' script executable..."
+chmod +x ./src/generate_results
+
+# Step 5: Add the Script Directory to PATH
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+if [[ ":$PATH:" != *":$SCRIPT_DIR:"* ]]; then
+  BASH_CONFIG="$HOME/.bashrc"
+  echo "Adding script directory to PATH..."
+  echo "export PATH=\$PATH:$SCRIPT_DIR" >> "$BASH_CONFIG"
+  source "$BASH_CONFIG"
+  echo "The directory $SCRIPT_DIR has been added to your PATH"
+  echo "Please restart your terminal or run 'source $BASH_CONFIG' to apply the changes"
+fi
+

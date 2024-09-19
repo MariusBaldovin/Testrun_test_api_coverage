@@ -1,5 +1,10 @@
-# Retrieve the script directory
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# Activate the virtual environment
+echo "Activating virtual environment..."
+source venv/bin/activate
+echo "Succesfully activated!"
 
-# Run the Python script
+# Run the Python Script
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+echo "Running the Python script..."
 python3 "$SCRIPT_DIR/generate_results.py"
+
