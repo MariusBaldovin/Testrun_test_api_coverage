@@ -4,11 +4,11 @@ Checks if test_api.py file exists in 'imported_files' directoy
 """
 
 def load_test_api_file(test_api_file):
-  """Loads the test_api.py file"""
+  """Loads and return the lines from test_api.py file"""
 
   try:
 
-    # Attempt to open and load the Postman file
+    # Attempt to open and load the test_api.py file
     with open(test_api_file, "r", encoding="utf-8") as file:
 
       # Return a list with all lines from the file

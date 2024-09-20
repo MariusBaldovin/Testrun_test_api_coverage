@@ -5,24 +5,23 @@ Module to create excel file
 import os
 import pandas as pd
 from counter import test_api_counter
-from util import postman
+from util import load_postman
 
 def extract_endpoint_path(path_elements):
-  """Joins the components of the 'path' key to create the endpoint"""
-
-  # Combine path elements into a full API endpoint path
+  """ Joins the components of the 'path' key to create the endpoint """
   endpoint = "/" + "/".join(path_elements)
+  # print(f"Extracted endpoint path from Postman: {endpoint}")
   return endpoint
 
-def calculate_percentages(test_count, unique_responses_count):
+def calculate_percentages(tested_count, unique_responses_count):
   """Calculates DONE and TO DO percentages based on test count and responses"""
 
-  # Check if test_count is zero
-  if test_count == 0:
+  # Check if tested_count is zero
+  if tested_count == 0:
     return "0.00 %", "100.00 %"
 
   # Calculate DONE percentage
-  done_percentage = (test_count / unique_responses_count) * 100
+  done_percentage = (tested_count / unique_responses_count) * 100
 
   # Calculate TO DO percentage
   todo_percentage = 100 - done_percentage
@@ -33,22 +32,22 @@ def calculate_percentages(test_count, unique_responses_count):
 def create_excel(postman_file, test_file_path, excel_filename):
   """ Create the excel file """
 
-  # Load the Postman file from 'util/load_postman.py'
-  postman_data = postman.load_postman(postman_file)
+  # Load the Postman file
+  postman_data = load_postman.load_postman(postman_file)
 
   # Error handling if postman file is not available
   if not postman_data:
     return
 
-  # Parse the test file to get the endpoint counts
-  endpoint_test_counts = test_api_counter.parse_test_api_file(test_file_path)
+  # Load the tested enpoints details
+  tested_endpoints = test_api_counter.parse_test_api_file(test_file_path)
 
   # Stop execution if the test file couldn't be processed
-  if endpoint_test_counts is None:
-    print(f"Error: Failed to create the excel file '{excel_filename}'")
+  if tested_endpoints is None:
+    print(f"Error: Failed to create the CSV file '{excel_filename}'")
     return
 
-  # Empty list to be assigned with rows to be written in the Excel file
+  # Empty list to be assigned with rows to be written in the csv
   rows = []
 
   # Iterate over all Postman file endpoints data
@@ -67,50 +66,58 @@ def create_excel(postman_file, test_file_path, excel_filename):
     responses = item["response"]
 
     # Extract the endpoint path from 'path' field using 'extract_endpoint_path'
-    endpoint_path = extract_endpoint_path(path)
+    endpoint = extract_endpoint_path(path)
 
-    # Create a list of unique response codes
+    # Create a set of unique response codes
     unique_responses = {response["code"] for response in responses}
 
     # Combine each endpoint responses into a string (one response per line)
-    combined_responses = "\n".join([response["name"] for response in responses])
+    combined_responses = "\n".join(
+      [response["name"] for response in responses]
+    )
 
-    # Use the function from api_test_counter to get test count for this endpoint
-    test_count = test_api_counter.get_test_count_for_endpoint(
-                                    endpoint_test_counts,
-                                    endpoint_path,
-                                    method
-                                  )
+    # Load the number of response codes tested and the responses
+    responses_tested, tested_count = (
+      test_api_counter.test_api_counter(
+        tested_endpoints,
+        endpoint,
+        method
+      )
+    )
 
-    # Calculate DONE and TO DO percentages
-    done_percentage, todo_percentage = calculate_percentages(
-                           test_count, len(unique_responses))
+    # Calculate done and to do percentages
+    done_percentage, todo_percentage = (
+      calculate_percentages(tested_count, len(unique_responses))
+    )
 
     # Not tested endpoints
-    not_tested = len(unique_responses) - test_count
+    not_tested = len(unique_responses) - tested_count
 
     # Construct the dictionary which represents a row in the table
     row = {
       "ENDPOINT NAME": item["name"],
-      "ENDPOINT PATH": endpoint_path,
+      "ENDPOINT PATH": endpoint,
       "METHOD": request["method"],
-      "API RESPONSES": combined_responses,
+      "POSTMAN API RESPONSES": combined_responses,
       "NUMBER OF RESPONSES": len(unique_responses),
-      "CURRENTLY TESTING": test_count,
+      "TOTAL RESPONSES TESTED": tested_count,
+      "API RESPONSES TESTED": responses_tested,
       "NOT TESTED": not_tested,
       "DONE": done_percentage, 
       "TO DO": todo_percentage
+      # "DESCRIPTION": request["description"]
     }
 
     # Append the row to the list
     rows.append(row)
 
-  # Convert to a table (using pandas)
+  # Convert rows to a table
   df = pd.DataFrame(rows)
 
   # Ensure the 'results' folder exists, if not, create it
   if not os.path.exists("results"):
     os.makedirs("results")
+
 
   def apply_colour_format(worksheet, column_range, workbook):
     """ Applies colour format to columns with percentages """

@@ -5,7 +5,7 @@ Module to create CSV file
 import os
 import pandas as pd
 from counter import test_api_counter
-from util import postman
+from util import load_postman
 
 def extract_endpoint_path(path_elements):
   """ Joins the components of the 'path' key to create the endpoint """
@@ -13,15 +13,15 @@ def extract_endpoint_path(path_elements):
   # print(f"Extracted endpoint path from Postman: {endpoint}")
   return endpoint
 
-def calculate_percentages(test_count, unique_responses_count):
+def calculate_percentages(tested_count, unique_responses_count):
   """Calculates DONE and TO DO percentages based on test count and responses"""
 
-  # Check if test_count is zero
-  if test_count == 0:
+  # Check if tested_count is zero
+  if tested_count == 0:
     return "0.00 %", "100.00 %"
 
   # Calculate DONE percentage
-  done_percentage = (test_count / unique_responses_count) * 100
+  done_percentage = (tested_count / unique_responses_count) * 100
 
   # Calculate TO DO percentage
   todo_percentage = 100 - done_percentage
@@ -33,17 +33,17 @@ def create_csv(postman_file, test_file_path, csv_filename):
   """ Create the CSV file """
 
   # Load the Postman file
-  postman_data = postman.load_postman(postman_file)
+  postman_data = load_postman.load_postman(postman_file)
 
   # Error handling if postman file is not available
   if not postman_data:
     return
 
-  # Parse the test file to get the endpoint counts
-  endpoint_test_counts = test_api_counter.parse_test_api_file(test_file_path)
+  # Load the tested enpoints details
+  tested_endpoints = test_api_counter.parse_test_api_file(test_file_path)
 
   # Stop execution if the test file couldn't be processed
-  if endpoint_test_counts is None:
+  if tested_endpoints is None:
     print(f"Error: Failed to create the CSV file '{csv_filename}'")
     return
 
@@ -76,27 +76,32 @@ def create_csv(postman_file, test_file_path, csv_filename):
       [response["name"] for response in responses]
     )
 
-    # Use the function from api_test_counter to get test count for this endpoint
-    test_count = test_api_counter.get_test_count_for_endpoint(
-                                    endpoint_test_counts,
-                                    endpoint,
-                                    method)
+    # Load the number of response codes tested and the responses
+    responses_tested, tested_count = (
+      test_api_counter.test_api_counter(
+        tested_endpoints,
+        endpoint,
+        method
+      )
+    )
 
-    # Calculate DONE and TO DO percentages
-    done_percentage, todo_percentage = calculate_percentages(
-                           test_count, len(unique_responses))
+    # Calculate done and to do percentages
+    done_percentage, todo_percentage = (
+      calculate_percentages(tested_count, len(unique_responses))
+    )
 
     # Not tested endpoints
-    not_tested = len(unique_responses) - test_count
+    not_tested = len(unique_responses) - tested_count
 
     # Construct the dictionary which represents a row in the table
     row = {
       "ENDPOINT NAME": item["name"],
       "ENDPOINT PATH": endpoint,
       "METHOD": request["method"],
-      "API RESPONSES": combined_responses,
+      "POSTMAN API RESPONSES": combined_responses,
       "NUMBER OF RESPONSES": len(unique_responses),
-      "CURRENTLY TESTING": test_count,
+      "TOTAL RESPONSES TESTED": tested_count,
+      "API RESPONSES TESTED": responses_tested,
       "NOT TESTED": not_tested,
       "DONE": done_percentage, 
       "TO DO": todo_percentage
