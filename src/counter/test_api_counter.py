@@ -27,7 +27,7 @@ def parse_test_api_file(file_path):
   test_pattern = re.compile(r"def test_\w+\(")
 
   # Variable to keep track of the current endpoint being processed
-  current_endpoint = None
+  endpoint_method = None
 
   # Track if the current test is skipped
   skip_test = False
@@ -53,18 +53,18 @@ def parse_test_api_file(file_path):
 
     # Check if the line ends with an open parenthesis
     if test_api_line.endswith("(") and i + 1 < len(test_api_lines):
-      # Concatenate with the next line
+      # Concatenate witbreakh the next line
       test_api_line += test_api_lines[i + 1].strip()
 
     # Check if the line is the start of a new test
-    if test_pattern.search(test_api_line):
+    if test_pattern.match(test_api_line):
     # Reset the flags to false for a new test
       skip_test = False
       found_first_request = False
       checked_status_code = False
 
     # Check if the test is marked as skipped
-    if skip_pattern.search(test_api_line):
+    if skip_pattern.match(test_api_line):
       # Change the skip_test to true
       skip_test = True
       # Skip the line
@@ -72,7 +72,7 @@ def parse_test_api_file(file_path):
 
     # If the test is skipped
     if skip_test:
-      # Skip all the lines on the test
+      # Skip all the lines for the test
       continue
 
     # Try to find an API request in the current line
@@ -86,26 +86,26 @@ def parse_test_api_file(file_path):
         method, endpoint = api_match.groups()
         # Remove the {API} placeholder, trailing '/' and change to lowercase
         endpoint = endpoint.replace("{API}", "").lower().rstrip("/")
-        # Store method and endpoint
-        current_endpoint = (method, endpoint)
+        # Store method and endpoint in tuple
+        endpoint_method = (endpoint, method)
         # Set found_first_request to true for next requests not be counted
         found_first_request = True
 
     # Find the status code check line
     if found_first_request and not checked_status_code:
       # Try to find a status code assertion in the current line
-      status_code_match = status_code_pattern.search(test_api_line)
+      status_code_match = status_code_pattern.match(test_api_line)
 
-      if status_code_match and current_endpoint:
+      if status_code_match and endpoint_method:
         # Capture the status code from the assertion
         status_code = status_code_match.group(1)
         # Check if the current endpoint is already in the dictionary
-        if current_endpoint not in endpoint_method_responses:
+        if endpoint_method not in endpoint_method_responses:
           # If not, initialize an empty set for this endpoint and method
-          endpoint_method_responses[current_endpoint] = set()
+          endpoint_method_responses[endpoint_method] = set()
 
         # Add the status code to the set for this endpoint and method
-        endpoint_method_responses[current_endpoint].add(status_code)
+        endpoint_method_responses[endpoint_method].add(status_code)
         # Set the checked_status_code to true to skip next lines
         checked_status_code = True
 
@@ -115,13 +115,14 @@ def parse_test_api_file(file_path):
       continue
 
   # Return dictionary
+  print(endpoint_method_responses)
   return endpoint_method_responses
 
 def test_api_counter(endpoint_method_responses, endpoint, method):
   """ Returns all unique responses and total responses for each endpoint """  
 
   # Response codes tested for each endpoint in test_api.py
-  tested = endpoint_method_responses.get((method, endpoint), set())
+  tested = endpoint_method_responses.get((endpoint, method), set())
 
   # Total responses tested for the endpoint
   tested_count = len(tested)
