@@ -20,7 +20,7 @@ def calculate_percentages(tested_count, api_responses_count):
   # Calculate TO DO percentage
   todo_percentage = 100 - done_percentage
 
-  # return DONE and TO DO percentages as strings
+  # Return DONE and TO DO percentages as strings
   return f"{done_percentage:.2f} %", f"{todo_percentage:.2f} %"
 
 def create_api_test_api_csv(test_api_file, api_file, csv_filename):

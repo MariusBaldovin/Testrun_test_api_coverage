@@ -36,8 +36,14 @@ def generate_results():
   # Name for api vs. postman pie chart
   api_postman_chart = "api_vs_postman_chart.png"
 
+  # Name for api_postman_chart title
+  api_postman_chart_title = "Postman Coverage"
+
   # Name for api.py vs. test_api.py chart
   api_test_api_chart = "api_vs_test_api.png"
+
+  # Name for api_postman_chart title
+  api_test_api_chart_title = "Testing Coverage"
 
   # Create api.py vs postman CSV file
   csv_api_postman.create_api_postman_csv(POSTMAN_FILE_PATH,
@@ -54,7 +60,9 @@ def generate_results():
                                     api_postman_filename)).to_dict("records")
 
     # Create the api.py vs. postman pie chart
-    coverage_pie_chart.plot_test_coverage(api_vs_postman_rows, api_postman_chart)
+    coverage_pie_chart.plot_test_coverage(api_vs_postman_rows,
+                                          api_postman_chart,
+                                          api_postman_chart_title )
 
   else:
 
@@ -77,7 +85,9 @@ def generate_results():
                                     api_test_api_filename)).to_dict("records")
 
     # Create the api.py vs. test_api.py pie chart
-    coverage_pie_chart.plot_test_coverage(api_vs_test_api_rows, api_test_api_chart)
+    coverage_pie_chart.plot_test_coverage(api_vs_test_api_rows,
+                                          api_test_api_chart,
+                                          api_test_api_chart_title)
 
   else:
 

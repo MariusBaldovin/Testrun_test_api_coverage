@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 RESULTS_DIR = "results"
 
-def plot_test_coverage(rows, chart_filename):
+def plot_test_coverage(rows, chart_filename, title):
   """ Plot the test coverage as a pie chart for 'Done' and 'To Do' """
 
   # Sum up all 'Done' percentages
@@ -32,9 +32,10 @@ def plot_test_coverage(rows, chart_filename):
   plt.figure(figsize=(8, 6))
   plt.pie(sizes, explode=explode, labels=labels, colors=colors,
           autopct="%1.1f%%", shadow=True, startangle=140)
+
   # Equal aspect ratio ensures that pie is drawn as a circle.
   plt.axis("equal")
-  plt.title("API Testing Coverage")
+  plt.title(title)
 
   # Ensure the results directory exists, if not, create it
   if not os.path.exists(RESULTS_DIR):
