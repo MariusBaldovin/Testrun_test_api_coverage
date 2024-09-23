@@ -11,7 +11,7 @@ def plot_test_coverage(rows, chart_filename):
   """ Plot the test coverage as a pie chart for 'Done' and 'To Do' """
 
   # Sum up all 'Done' percentages
-  total_done = sum(float(row["DONE"].rstrip(' %')) for row in rows)
+  total_done = sum(float(row["DONE"].rstrip(" %")) for row in rows)
 
   # Total number of endpoints
   total_count = len(rows)
@@ -23,18 +23,18 @@ def plot_test_coverage(rows, chart_filename):
   average_to_do = 100 - average_done
 
   # Data to plot
-  labels = 'Done', 'To Do'
+  labels = "Done", "To Do"
   sizes = [average_done, average_to_do]
-  colors = ['#c2f1c8', '#ff6d70']
+  colors = ["#c2f1c8", "#ff6d70"]
   explode = (0.1, 0)
 
   # Plot
   plt.figure(figsize=(8, 6))
   plt.pie(sizes, explode=explode, labels=labels, colors=colors,
-          autopct='%1.1f%%', shadow=True, startangle=140)
+          autopct="%1.1f%%", shadow=True, startangle=140)
   # Equal aspect ratio ensures that pie is drawn as a circle.
-  plt.axis('equal')
-  plt.title('API Testing Coverage')
+  plt.axis("equal")
+  plt.title("API Testing Coverage")
 
   # Ensure the results directory exists, if not, create it
   if not os.path.exists(RESULTS_DIR):
@@ -42,4 +42,4 @@ def plot_test_coverage(rows, chart_filename):
 
   # Save the plot as a PNG file
   plt.savefig(os.path.join(RESULTS_DIR, chart_filename))
-  print(f"The Pie Chart was successfully exported to results/{chart_filename}")
+  print(f"{chart_filename} successfully exported to results/{chart_filename}")

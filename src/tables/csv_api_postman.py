@@ -1,10 +1,10 @@
 """
-Module to create CSV file
+Module to create CSV file for api.py and postman data
 """
 
 import os
 import pandas as pd
-from counter import test_api_counter
+from counter import api_counter
 from util import load_postman
 
 def extract_endpoint_path(path_elements):
@@ -29,7 +29,7 @@ def calculate_percentages(tested_count, unique_responses_count):
   # return DONE and TO DO percentages as strings
   return f"{done_percentage:.2f} %", f"{todo_percentage:.2f} %"
 
-def create_csv(postman_file, test_file_path, csv_filename):
+def create_api_postman_csv(postman_file, api_file, csv_filename):
   """ Create the CSV file """
 
   # Load the Postman file
@@ -39,16 +39,16 @@ def create_csv(postman_file, test_file_path, csv_filename):
   if not postman_data:
     return
 
-  # Load the tested enpoints details
-  tested_endpoints = test_api_counter.parse_test_api_file(test_file_path)
-
-  # Stop execution if the test file couldn't be processed
-  if tested_endpoints is None:
-    print(f"Error: Failed to create the CSV file '{csv_filename}'")
-    return
-
   # Empty list to be assigned with rows to be written in the csv
   rows = []
+
+  # Load the api.py enpoints details
+  api_endpoints = api_counter.parse_api_file(api_file)
+
+  # Error handling if the test_api.py couldn't be processed
+  if api_endpoints is None:
+    print(f"Error: Failed to create the CSV file '{csv_filename}'")
+    return
 
   # Iterate over all Postman file endpoints data
   for item in postman_data["item"]:
@@ -76,10 +76,10 @@ def create_csv(postman_file, test_file_path, csv_filename):
       [response["name"] for response in responses]
     )
 
-    # Load the number of response codes tested and the responses
-    responses_tested, tested_count = (
-      test_api_counter.test_api_counter(
-        tested_endpoints,
+    # Load the response codes and total responses from api.py
+    api_responses, api_responses_count = (
+      api_counter.api_counter(
+        api_endpoints,
         endpoint,
         method
       )
@@ -87,25 +87,25 @@ def create_csv(postman_file, test_file_path, csv_filename):
 
     # Calculate done and to do percentages
     done_percentage, todo_percentage = (
-      calculate_percentages(tested_count, len(unique_responses))
+      calculate_percentages(len(unique_responses), api_responses_count)
     )
 
     # Not tested endpoints
-    not_tested = len(unique_responses) - tested_count
+    not_tested = len(unique_responses) - api_responses_count
 
     # Construct the dictionary which represents a row in the table
     row = {
       "ENDPOINT NAME": item["name"],
       "ENDPOINT PATH": endpoint,
       "METHOD": request["method"],
-      "POSTMAN API RESPONSES": combined_responses,
-      "NUMBER OF RESPONSES": len(unique_responses),
-      "TOTAL RESPONSES TESTED": tested_count,
-      "API RESPONSES TESTED": responses_tested,
+      "POSTMAN API RESPONSES (postman)": combined_responses,
+      "TOTAL POSTMAN RESPONSES (postman)": len(unique_responses),
+      "API FILE RESPONSES (api.py)": api_responses,
+      "TOTAL API FILE RESPONSES (api.py)": api_responses_count,
       "NOT TESTED": not_tested,
       "DONE": done_percentage, 
-      "TO DO": todo_percentage
-      # "DESCRIPTION": request["description"]
+      "TO DO": todo_percentage,
+      "DESCRIPTION": request["description"]
     }
 
     # Append the row to the list
@@ -120,4 +120,4 @@ def create_csv(postman_file, test_file_path, csv_filename):
 
   # Save the DataFrame to CSV inside the 'results' folder
   df.to_csv(os.path.join("results", csv_filename), index=False)
-  print(f"The CSV file was successfully exported to 'results/{csv_filename}'")
+  print(f"{csv_filename} successfully exported to 'results/{csv_filename}'")

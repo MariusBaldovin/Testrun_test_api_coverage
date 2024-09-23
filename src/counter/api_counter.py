@@ -94,17 +94,17 @@ def parse_api_file(file_path):
 
     # Remove leading and trailing spaces
     api_line = api_line.strip()
-    
+
     # Check if function_pattern is found in the line
     function_pattern_match = function_pattern.search(api_line)
-    
+
     # If a match is found
     if function_pattern_match:
 
-      # Extract the function name 
+      # Extract the function name
       function_name = function_pattern_match.group(1)
 
-      # Check if function_name is in the list api_functions to ignore utility functions
+      # Check if funcion name is in api_functions to ignore utility functions
       if function_name in api_functions:
 
         # Assign the function name to 'curent_function' variable
@@ -112,7 +112,7 @@ def parse_api_file(file_path):
 
         # Add the function as key and value empty set
         function_status_codes[current_function] = set()
-        
+
     # If function was found
     if current_function:
 
@@ -133,18 +133,39 @@ def parse_api_file(file_path):
 
   # Find the 'get' endpoints functions with no 200 status code for success
   for (endpoint, method), function in extracted_api_details.items():
-  
-    # Check if the method is 'get'
-    if method == "get":
-        
-      # if '200' not in the function's status codes
-      if "200" not in function_status_codes.get(function, set()):
 
-        #  Add 200
-        function_status_codes[function].add("200")
+    # if '200' and '201' not in the function's status codes
+    if not {"200", "201"} & function_status_codes.get(function, set()):
 
-  print(f"(endpoint, method): function - {extracted_api_details}")
-  print(f"function: status codes -  {function_status_codes}")
-  return extracted_api_details
+      #  Add status code 200
+      function_status_codes[function].add("200")
 
+  # New dict to store '(endpoint, method): status codes'
+  endpoint_method_responses = {}
 
+  # Iterate over extracted_api_details keys and values
+  for endpoint_method, function in extracted_api_details.items():
+
+    # Get the status codes for the function
+    responses = function_status_codes.get(function)
+
+    # Add status codes as value for (endpoint, method)
+    endpoint_method_responses[endpoint_method] = responses
+
+  # Return dictionary
+  return endpoint_method_responses
+
+def api_counter(endpoint_method_responses, endpoint, method):
+  """ Returns all unique responses and total responses for each endpoint """  
+
+  # Response codes for each endpoint in api.py
+  responses = endpoint_method_responses.get((endpoint, method), set())
+
+  # Total responses for the endpoint
+  responses_count = len(responses)
+
+  # Combine each endpoint responses into a string (one per line)
+  format_responses = "\n".join(map(str, sorted(responses)))
+
+  # Return each response and total responses
+  return format_responses, responses_count

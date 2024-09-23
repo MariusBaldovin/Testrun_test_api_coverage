@@ -11,7 +11,7 @@ from util import load_test_api_file
 def parse_test_api_file(file_path):
   """ Parse test_api.py and store endpoint, method and their response code """
 
-  # Dict to store each endpoint, method and status codes
+  # Dict to store each (endpoint, method): status codes
   endpoint_method_responses = {}
 
   # Pattern to match API requests even when split across 2 lines
@@ -115,7 +115,6 @@ def parse_test_api_file(file_path):
       continue
 
   # Return dictionary
-  print(endpoint_method_responses)
   return endpoint_method_responses
 
 def test_api_counter(endpoint_method_responses, endpoint, method):

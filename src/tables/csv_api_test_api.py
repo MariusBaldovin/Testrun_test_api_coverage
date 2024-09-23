@@ -1,0 +1,101 @@
+"""
+Module to create CSV file for api.py vs test_api.py data
+"""
+
+import os
+import pandas as pd
+from counter import test_api_counter
+from counter import api_counter
+
+def calculate_percentages(tested_count, api_responses_count):
+  """Calculates DONE and TO DO percentages based on test count and responses"""
+
+  # Check if tested_count is zero
+  if tested_count == 0:
+    return "0.00 %", "100.00 %"
+
+  # Calculate DONE percentage
+  done_percentage = (tested_count / api_responses_count) * 100
+
+  # Calculate TO DO percentage
+  todo_percentage = 100 - done_percentage
+
+  # return DONE and TO DO percentages as strings
+  return f"{done_percentage:.2f} %", f"{todo_percentage:.2f} %"
+
+def create_api_test_api_csv(test_api_file, api_file, csv_filename):
+  """ Create the CSV file """
+
+  # Load the api.py enpoints details
+  api_endpoints = api_counter.parse_api_file(api_file)
+
+  # Error handling if the test_api.py couldn't be processed
+  if api_endpoints is None:
+    print(f"Error: Failed to create the CSV file '{csv_filename}'")
+    return
+
+  # Load the test_api.py enpoints details
+  test_api_endpoints = test_api_counter.parse_test_api_file(test_api_file)
+
+  # Error handling if the test_api.py couldn't be processed
+  if test_api_endpoints is None:
+    print(f"Error: Failed to create the CSV file '{csv_filename}'")
+    return
+
+  # Empty list to be assigned with rows to be written in the csv
+  rows = []
+
+  for (endpoint, method), _ in api_endpoints.items():
+
+    # Load the response codes and total responses from api.py
+    api_responses, api_responses_count = (
+      api_counter.api_counter(
+        api_endpoints,
+        endpoint,
+        method
+      )
+    )
+
+    # Load the response codes tested and total responses from test_api.py
+    responses_tested, tested_count = (
+      test_api_counter.test_api_counter(
+        test_api_endpoints,
+        endpoint,
+        method
+      )
+    )
+
+    # Calculate done and to do percentages
+    done_percentage, todo_percentage = (
+      calculate_percentages(tested_count, api_responses_count)
+    )
+
+    # Not tested endpoints
+    not_tested = api_responses_count - tested_count
+
+    # Construct the dictionary which represents a row in the table
+    row = {
+      "ENDPOINT PATH": endpoint,
+      "METHOD": method,
+      "API FILE RESPONSES (api.py)": api_responses,
+      "TOTAL API FILE RESPONSES (api.py)": api_responses_count,
+      "TEST API FILE RESPONSES (test_api.py) ": responses_tested,
+      "TOTAL TEST API FILE RESPONSES (test_api.py)": tested_count,
+      "NOT TESTED": not_tested,
+      "DONE": done_percentage, 
+      "TO DO": todo_percentage,
+    }
+
+    # Append the row to the list
+    rows.append(row)
+
+  # Convert rows to a table
+  df = pd.DataFrame(rows)
+
+  # Ensure the 'results' folder exists, if not, create it
+  if not os.path.exists("results"):
+    os.makedirs("results")
+
+  # Save the DataFrame to CSV inside the 'results' folder
+  df.to_csv(os.path.join("results", csv_filename), index=False)
+  print(f"{csv_filename} successfully exported to 'results/{csv_filename}'")
