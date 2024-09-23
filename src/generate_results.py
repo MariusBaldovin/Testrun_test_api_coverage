@@ -1,8 +1,7 @@
 """
 Main module to create:
-- CSV file
-- Excel file
-- Pie Chart
+- CSV files
+- Pie Charts
 
 """
 
