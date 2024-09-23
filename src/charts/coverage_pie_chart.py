@@ -19,7 +19,7 @@ def plot_test_coverage(rows, chart_filename):
   # Average 'Done' percentage
   average_done = total_done / total_count if total_count > 0 else 0
 
-  # Calculate 'To Do' as the remainder to 100%
+  # Calc``ulate 'To Do' as the remainder to 100%
   average_to_do = 100 - average_done
 
   # Data to plot

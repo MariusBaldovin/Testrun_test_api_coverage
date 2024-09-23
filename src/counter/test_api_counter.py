@@ -121,13 +121,16 @@ def test_api_counter(endpoint_method_responses, endpoint, method):
   """ Returns all unique responses and total responses for each endpoint """  
 
   # Response codes tested for each endpoint in test_api.py
-  tested = endpoint_method_responses.get((endpoint, method), set())
+  res_tested = endpoint_method_responses.get((endpoint, method), set())
 
   # Total responses tested for the endpoint
-  tested_count = len(tested)
+  tested_count = len(res_tested)
 
   # Combine each tested endpoint responses into a string (one per line)
-  format_tested = "\n".join(map(str, sorted(tested)))
+  # format_res_tested = "\n".join(map(str, sorted(res_tested)))
+
+  # Change the responses from strigs to integers
+  format_res_tested = [int(code) for code in sorted(res_tested)]
 
   # Return each response tested and total responses
-  return format_tested, tested_count
+  return format_res_tested, tested_count

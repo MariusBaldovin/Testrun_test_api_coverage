@@ -11,8 +11,7 @@ import pandas as pd
 
 from tables import csv_api_test_api
 from tables import csv_api_postman
-from tables import create_excel
-from charts import test_coverage
+from charts import coverage_pie_chart
 
 # Path for test_api.py file
 TEST_API_FILE_PATH = "imported_files/test_api.py"
@@ -34,26 +33,15 @@ def generate_results():
   # Name for api.py vs. test_api.py csv file
   api_test_api_filename = "api_vs_test_api.csv"
 
-  # Name for the created excel file
-  excel_filename = "Api_testing_coverage.xlsx"
-
   # Name for api vs. postman pie chart
-  api_postman_chart = "api_postman_chart.png"
+  api_postman_chart = "api_vs_postman_chart.png"
 
   # Name for api.py vs. test_api.py chart
-  api_test_api_chart = "test_coverage.png"
+  api_test_api_chart = "api_vs_test_api.png"
 
-  # Create the CSV file
+  # Create api.py vs postman CSV file
   csv_api_postman.create_api_postman_csv(POSTMAN_FILE_PATH,
                                 API_FILE_PATH, api_postman_filename)
-
-  # Create the CSV file
-  csv_api_test_api.create_api_test_api_csv(TEST_API_FILE_PATH, API_FILE_PATH,
-                                           api_test_api_filename)
-
-  # Create the excel file
-  create_excel.create_excel(POSTMAN_FILE_PATH, TEST_API_FILE_PATH,
-                                                   excel_filename)
 
   # Construct the full path for api.py vs. postman csv file
   api_postman_csv_path = os.path.join(RESULTS_DIR, api_postman_filename)
@@ -66,13 +54,17 @@ def generate_results():
                                     api_postman_filename)).to_dict("records")
 
     # Create the api.py vs. postman pie chart
-    test_coverage.plot_test_coverage(api_vs_postman_rows, api_postman_chart)
+    coverage_pie_chart.plot_test_coverage(api_vs_postman_rows, api_postman_chart)
 
   else:
 
     # Print error messages
     print(f"Error: Pie chart '{api_postman_chart}' could not be created")
     print(f"Info: {api_postman_filename} must be in '{RESULTS_DIR}' folder")
+
+  # Create the api.py vs test_api.py CSV file
+  csv_api_test_api.create_api_test_api_csv(TEST_API_FILE_PATH, API_FILE_PATH,
+                                           api_test_api_filename)
 
   # Construct the full path for api.py vs. test_api.py csv file
   api_test_api_csv_path = os.path.join(RESULTS_DIR, api_test_api_filename)
@@ -85,7 +77,7 @@ def generate_results():
                                     api_test_api_filename)).to_dict("records")
 
     # Create the api.py vs. test_api.py pie chart
-    test_coverage.plot_test_coverage(api_vs_test_api_rows, api_test_api_chart)
+    coverage_pie_chart.plot_test_coverage(api_vs_test_api_rows, api_test_api_chart)
 
   else:
 

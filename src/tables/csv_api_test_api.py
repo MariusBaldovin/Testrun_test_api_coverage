@@ -1,5 +1,5 @@
 """
-Module to create CSV file for api.py vs test_api.py data
+Module to create CSV file for api.py versus test_api.py data
 """
 
 import os
@@ -70,6 +70,13 @@ def create_api_test_api_csv(test_api_file, api_file, csv_filename):
       calculate_percentages(tested_count, api_responses_count)
     )
 
+    # Calculate the response codes not tested
+    not_tested_responses = sorted(set(api_responses) - set(responses_tested))
+
+    # If all endpoint are tested the cell is left empy
+    if len(not_tested_responses) == 0:
+      not_tested_responses = ""
+
     # Not tested endpoints
     not_tested = api_responses_count - tested_count
 
@@ -77,10 +84,11 @@ def create_api_test_api_csv(test_api_file, api_file, csv_filename):
     row = {
       "ENDPOINT PATH": endpoint,
       "METHOD": method,
-      "API FILE RESPONSES (api.py)": api_responses,
-      "TOTAL API FILE RESPONSES (api.py)": api_responses_count,
-      "TEST API FILE RESPONSES (test_api.py) ": responses_tested,
-      "TOTAL TEST API FILE RESPONSES (test_api.py)": tested_count,
+      "API RESPONSES": api_responses,
+      "TEST API FILE RESPONSES": responses_tested,
+      "NOT TESTED RESPONSES": not_tested_responses,
+      "TOTAL API RESPONSES": api_responses_count,
+      "TOTAL TEST API RESPONSES": tested_count,
       "NOT TESTED": not_tested,
       "DONE": done_percentage, 
       "TO DO": todo_percentage,

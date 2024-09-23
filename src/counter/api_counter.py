@@ -165,7 +165,10 @@ def api_counter(endpoint_method_responses, endpoint, method):
   responses_count = len(responses)
 
   # Combine each endpoint responses into a string (one per line)
-  format_responses = "\n".join(map(str, sorted(responses)))
+  # format_responses = "\n".join(map(str, sorted(responses)))
+
+  # Change the responses from strigs to integers
+  format_responses = [int(code) for code in sorted(responses)]
 
   # Return each response and total responses
   return format_responses, responses_count
