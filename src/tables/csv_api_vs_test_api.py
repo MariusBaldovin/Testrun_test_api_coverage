@@ -7,15 +7,15 @@ import pandas as pd
 from counter import test_api_counter
 from counter import api_counter
 
-def calculate_percentages(tested_count, api_responses_count):
+def calculate_percentages(postman_responses_count, api_responses_count):
   """Calculates DONE and TO DO percentages based on test count and responses"""
 
-  # Check if tested_count is zero
-  if tested_count == 0:
+  # Check if postman_responses_count is zero
+  if postman_responses_count == 0:
     return "0.00 %", "100.00 %"
 
   # Calculate DONE percentage
-  done_percentage = (tested_count / api_responses_count) * 100
+  done_percentage = (postman_responses_count / api_responses_count) * 100
 
   # Calculate TO DO percentage
   todo_percentage = 100 - done_percentage
@@ -24,7 +24,7 @@ def calculate_percentages(tested_count, api_responses_count):
   return f"{done_percentage:.2f} %", f"{todo_percentage:.2f} %"
 
 def create_api_test_api_csv(test_api_file, api_file, csv_filename):
-  """ Create the CSV file """
+  """ Create the api.py vs. test_api.py CSV file """
 
   # Load the api.py enpoints details
   api_endpoints = api_counter.parse_api_file(api_file)
@@ -57,7 +57,7 @@ def create_api_test_api_csv(test_api_file, api_file, csv_filename):
     )
 
     # Load the response codes tested and total responses from test_api.py
-    responses_tested, tested_count = (
+    responses_tested, postman_responses_count = (
       test_api_counter.test_api_counter(
         test_api_endpoints,
         endpoint,
@@ -67,7 +67,7 @@ def create_api_test_api_csv(test_api_file, api_file, csv_filename):
 
     # Calculate done and to do percentages
     done_percentage, todo_percentage = (
-      calculate_percentages(tested_count, api_responses_count)
+      calculate_percentages(postman_responses_count, api_responses_count)
     )
 
     # Calculate the response codes not tested
@@ -78,17 +78,17 @@ def create_api_test_api_csv(test_api_file, api_file, csv_filename):
       not_tested_responses = ""
 
     # Not tested endpoints
-    not_tested = api_responses_count - tested_count
+    not_tested = api_responses_count - postman_responses_count
 
     # Construct the dictionary which represents a row in the table
     row = {
       "ENDPOINT PATH": endpoint,
-      "METHOD": method,
+      "METHOD": method.upper(),
       "API RESPONSES": api_responses,
       "TEST API FILE RESPONSES": responses_tested,
       "NOT TESTED RESPONSES": not_tested_responses,
       "TOTAL API RESPONSES": api_responses_count,
-      "TOTAL TEST API RESPONSES": tested_count,
+      "TOTAL POSTMAN RESPONSES": postman_responses_count,
       "NOT TESTED": not_tested,
       "DONE": done_percentage, 
       "TO DO": todo_percentage,

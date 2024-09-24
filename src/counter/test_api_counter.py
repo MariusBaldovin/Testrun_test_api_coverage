@@ -8,7 +8,7 @@ import re
 from util import load_test_api_file
 
 # Parse the test file to count each endpoint unique status codes
-def parse_test_api_file(file_path):
+def parse_test_api_file(test_api_path):
   """ Parse test_api.py and store endpoint, method and all response codes """
 
   # Dict to store each (endpoint, method): status codes
@@ -39,7 +39,7 @@ def parse_test_api_file(file_path):
   checked_status_code = False
 
   # Load the test_apy.py lines
-  test_api_lines = load_test_api_file.load_test_api_file(file_path)
+  test_api_lines = load_test_api_file.load_test_api_file(test_api_path)
 
   # Error handling if test_api.py file is not available
   if not test_api_lines:
@@ -109,7 +109,7 @@ def parse_test_api_file(file_path):
 
       # If the a statsu code assert match was found
       if status_code_match and endpoint_method:
- 
+
         # Capture the status code from the assertion
         status_code = status_code_match.group(1)
 
@@ -119,8 +119,11 @@ def parse_test_api_file(file_path):
           # If not, initialize an empty set for this endpoint and method
           endpoint_method_responses[endpoint_method] = set()
 
-        # Add the status code to the set for this endpoint and method
-        endpoint_method_responses[endpoint_method].add(status_code)
+        # Exclude the 500 error
+        if status_code != "500":
+
+          # Add the status code to the set for this endpoint and method
+          endpoint_method_responses[endpoint_method].add(status_code)
 
         # Set the checked_status_code to true to skip next lines
         checked_status_code = True

@@ -8,8 +8,8 @@ Main module to create:
 import os
 import pandas as pd
 
-from tables import csv_api_test_api
-from tables import csv_api_postman
+from tables import csv_api_vs_test_api
+from tables import csv_api_vs_postman
 from charts import coverage_pie_chart
 
 # Path for test_api.py file
@@ -45,7 +45,7 @@ def generate_results():
   api_test_api_chart_title = "Testing Coverage"
 
   # Create api.py vs postman CSV file
-  csv_api_postman.create_api_postman_csv(POSTMAN_FILE_PATH,
+  csv_api_vs_postman.create_api_postman_csv(POSTMAN_FILE_PATH,
                                 API_FILE_PATH, api_postman_filename)
 
   # Construct the full path for api.py vs. postman csv file
@@ -70,7 +70,7 @@ def generate_results():
     print(f"Info: {api_postman_filename} must be in '{RESULTS_DIR}' folder")
 
   # Create the api.py vs test_api.py CSV file
-  csv_api_test_api.create_api_test_api_csv(TEST_API_FILE_PATH, API_FILE_PATH,
+  csv_api_vs_test_api.create_api_test_api_csv(TEST_API_FILE_PATH, API_FILE_PATH,
                                            api_test_api_filename)
 
   # Construct the full path for api.py vs. test_api.py csv file

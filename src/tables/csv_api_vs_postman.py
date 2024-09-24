@@ -5,13 +5,7 @@ Module to create CSV file for api.py and postman data
 import os
 import pandas as pd
 from counter import api_counter
-from util import load_postman
-
-def extract_endpoint_path(path_elements):
-  """ Joins the components of the 'path' key to create the endpoint """
-  endpoint = "/" + "/".join(path_elements)
-  # print(f"Extracted endpoint path from Postman: {endpoint}")
-  return endpoint
+from counter import postman_counter
 
 def calculate_percentages(tested_count, unique_responses_count):
   """Calculates DONE and TO DO percentages based on test count and responses"""
@@ -30,17 +24,7 @@ def calculate_percentages(tested_count, unique_responses_count):
   return f"{done_percentage:.2f} %", f"{todo_percentage:.2f} %"
 
 def create_api_postman_csv(postman_file, api_file, csv_filename):
-  """ Create the CSV file """
-
-  # Load the Postman file
-  postman_data = load_postman.load_postman(postman_file)
-
-  # Error handling if postman file is not available
-  if not postman_data:
-    return
-
-  # Empty list to be assigned with rows to be written in the csv
-  rows = []
+  """ Create the api vs postman CSV file """
 
   # Load the api.py enpoints details
   api_endpoints = api_counter.parse_api_file(api_file)
@@ -50,31 +34,18 @@ def create_api_postman_csv(postman_file, api_file, csv_filename):
     print(f"Error: Failed to create the CSV file '{csv_filename}'")
     return
 
-  # Iterate over all Postman file endpoints data
-  for item in postman_data["item"]:
+  # Load the postman enpoints details
+  postman_endpoints = postman_counter.parse_postman_file(postman_file)
 
-    # Assign the 'request' field
-    request = item["request"]
+  # Error handling if psotman file couldn't be processed
+  if postman_endpoints is None:
+    print(f"Error: Failed to create the CSV file '{csv_filename}'")
+    return
 
-    # Assign the 'path' field
-    path = request["url"]["path"]
+  # Empty list to be assigned with rows to be written in the csv
+  rows = []
 
-    # Extract the endpoint method and change to lowercase
-    method = request["method"].lower()
-
-    # Assign the 'response' field
-    responses = item["response"]
-
-    # Extract the endpoint path from 'path' field using 'extract_endpoint_path'
-    endpoint = extract_endpoint_path(path)
-
-    # Create a set of unique response codes
-    unique_responses = {response["code"] for response in responses}
-
-    # Combine each endpoint responses into a string (one response per line)
-    combined_responses = "\n".join(
-      [response["name"] for response in responses]
-    )
+  for (endpoint, method), _ in api_endpoints.items():
 
     # Load the response codes and total responses from api.py
     api_responses, api_responses_count = (
@@ -85,27 +56,42 @@ def create_api_postman_csv(postman_file, api_file, csv_filename):
       )
     )
 
-    # Calculate done and to do percentages
-    done_percentage, todo_percentage = (
-      calculate_percentages(len(unique_responses), api_responses_count)
+    # Load the response codes tested and total responses from postman file
+    postman_responses, postman_responses_count = (
+      postman_counter.postman_counter(
+        postman_endpoints,
+        endpoint,
+        method
+      )
     )
 
+    # Calculate done and to do percentages
+    done_percentage, todo_percentage = (
+      calculate_percentages(postman_responses_count, api_responses_count)
+    )
+
+    # Calculate the response codes not tested
+    not_tested_responses = sorted(set(api_responses) - set(postman_responses))
+
+    # If all endpoint are tested the cell is left empy
+    if len(not_tested_responses) == 0:
+      not_tested_responses = ""
+
     # Not tested endpoints
-    not_tested = len(unique_responses) - api_responses_count
+    not_tested = api_responses_count - postman_responses_count
 
     # Construct the dictionary which represents a row in the table
     row = {
-      "ENDPOINT NAME": item["name"],
       "ENDPOINT PATH": endpoint,
-      "METHOD": request["method"],
-      "POSTMAN API RESPONSES (postman)": combined_responses,
-      "TOTAL POSTMAN RESPONSES (postman)": len(unique_responses),
-      "API FILE RESPONSES (api.py)": api_responses,
-      "TOTAL API FILE RESPONSES (api.py)": api_responses_count,
+      "METHOD": method.upper(),
+      "API RESPONSES": api_responses,
+      "POSTMAN RESPONSES": postman_responses,
+      "NOT TESTED RESPONSES": not_tested_responses,
+      "TOTAL API RESPONSES": api_responses_count,
+      "TOTAL POSTMAN RESPONSES": postman_responses_count,
       "NOT TESTED": not_tested,
       "DONE": done_percentage, 
       "TO DO": todo_percentage,
-      "DESCRIPTION": request["description"]
     }
 
     # Append the row to the list

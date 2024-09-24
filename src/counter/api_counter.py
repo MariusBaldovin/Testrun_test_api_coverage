@@ -7,8 +7,8 @@ unique response codes for each (endpoint, method)
 import re
 from util import load_api_file
 
-def parse_api_file(file_path):
-  """Extract endpoints and methods from api.py lines"""
+def parse_api_file(api_path):
+  """Extract endpoints, methods, fucntions and status codes from api.py lines"""
 
   # Pattern to match the 'add_api_route' function api calls
   api_route_pattern = re.compile(
@@ -22,7 +22,7 @@ def parse_api_file(file_path):
   status_code_pattern = re.compile(r"response\.status_code\s*=\s*(\w+(\.\w+)*)")
 
   # Load the 'api.py' lines
-  api_lines = load_api_file.load_api_file(file_path)
+  api_lines = load_api_file.load_api_file(api_path)
 
   # Error handling if api.py file is not available
   if not api_lines:
@@ -128,8 +128,11 @@ def parse_api_file(file_path):
         # Extract the digits from the status code value
         status_code = re.search(r"\d+", status_code_value)
 
-        # Add status code to the dict value inside the set
-        function_status_codes[current_function].add(status_code.group(0))
+        # Exclude 500 errors from the status codes
+        if status_code.group(0) != "500":
+          
+          # Add status code to the dict value inside the set
+          function_status_codes[current_function].add(status_code.group(0))
 
   # Find the 'get' endpoints functions with no 200 status code for success
   for (endpoint, method), function in extracted_api_details.items():
